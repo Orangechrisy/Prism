@@ -7,48 +7,39 @@ class Load extends Phaser.Scene {
         this.load.setPath("./assets/");
 
         // Load characters spritesheet
-        //this.load.atlas("platformer_characters", "platformer_characters.png", "monochrome_tilemap_packed.json");
+        this.load.spritesheet("characters", "monochrome_tilemap_packed.png", {
+            frameWidth: 16,
+            frameHeight: 16,
+        });
 
         // Load tilemap information
         this.load.image("main_tiles", "monochrome_tilemap_packed.png");
-        this.load.image("colors", "colors_tilemap_packed.png");
         this.load.tilemapTiledJSON("coloredLevel", "coloredLevel.tmj");   // Tilemap in JSON
+        this.load.image("background", "background.png");
     }
 
     create() {
-        /*
         this.anims.create({
             key: 'walk',
-            frames: this.anims.generateFrameNames('platformer_characters', {
-                prefix: "tile_",
-                start: 261,
-                end: 263,
-                suffix: ".png",
-                zeroPad: 4
-            }),
-            frameRate: 15,
-            repeat: -1
+            frameRate: 8,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('characters', { start: 261, end: 263 })
         });
 
         this.anims.create({
             key: 'idle',
-            defaultTextureKey: "platformer_characters",
-            frames: [
-                { frame: "tile_0260.png" }
-            ],
-            repeat: -1
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('characters', { start: 260, end: 260 })
         });
 
         this.anims.create({
             key: 'jump',
-            defaultTextureKey: "platformer_characters",
-            frames: [
-                { frame: "tile_0264.png" }
-            ],
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('characters', { start: 264, end: 264 })
         });
-        */
+        
          // ...and pass to the next Scene
-         this.scene.start("level1");
+        this.scene.start("level1");
     }
 
     // Never get here since a new scene is started in create()

@@ -1,0 +1,45 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "coloredLevel.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "coloredLevel.tmx": {
+            "scale": 0.3435267857142857,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 1122.1832358674465,
+                "y": 267.8102664067577
+            }
+        },
+        "coloredLevel.tmx#monochrome_tilemap_packed": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "C:/Users/chris/Documents/cmpm120/FinalGame/assets",
+    "last.imagePath": "C:/Users/chris/Documents/cmpm120/FinalGame/assets",
+    "map.height": 60,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 140,
+    "openFiles": [
+        "coloredLevel.tmx"
+    ],
+    "project": "coloredLevel.tiled-project",
+    "property.type": "bool",
+    "recentFiles": [
+        "coloredLevel.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

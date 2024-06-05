@@ -31,7 +31,8 @@ let config = {
     },
     width: 1000,
     height: 600,
-    scene: [Load, Level1]
+    scene: [Load, Level1],
+    fps: { forceSetTimeOut: true, target: 60 }
 }
 
 var cursors;
