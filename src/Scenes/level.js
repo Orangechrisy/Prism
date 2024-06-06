@@ -21,6 +21,8 @@ class Level1 extends Phaser.Scene {
         this.orangeUnlock = false;
         this.pinkUnlock = false;
         this.pauseScene = false;
+
+        this.lastAlive = [50, 108];
     }
 
     create() {
@@ -167,7 +169,7 @@ class Level1 extends Phaser.Scene {
         }, this);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(50, 100, "tilemap_sprites", 260);
+        my.sprite.player = this.physics.add.sprite(50, 108, "tilemap_sprites", 260);
         my.sprite.player.setCollideWorldBounds(true);
         my.sprite.player.setMaxVelocity(this.MAX_SPEED, 1000);
 
@@ -276,6 +278,21 @@ class Level1 extends Phaser.Scene {
         enemy.direction = true; // left is true, right is false
         enemy.awake = false;
         
+        // checkpoint
+        this.checkpoints = this.map.createFromObjects("items", {
+            name: "checkpoint",
+            key: "tilemap_sprites",
+            frame: 369
+        });
+        this.physics.world.enable(this.checkpoints, Phaser.Physics.Arcade.STATIC_BODY);
+        this.physics.add.overlap(my.sprite.player, this.checkpoints, (obj1, obj2) => {
+            this.lastAlive = [obj1.x, obj1.y];
+            console.log(this.lastAlive);
+            // for (let checkpoint of this.checkpoints) {
+            //     checkpoint.anims.pause();
+            // }
+            obj2.anims.play('checkpoint', true);
+        });
 
     }
     update() {
@@ -326,24 +343,14 @@ class Level1 extends Phaser.Scene {
                     else {
                         if (this.enemyTurnAround(enemy)) {
                             enemy.direction = !enemy.direction;
-                            if (enemy.direction) {
-                                enemy.setVelocityX(-50);
-                            }
-                            else {
-                                enemy.setVelocityX(50);
-                            }
+                            this.enemySetVelocity(enemy);
                         }
                     }
                 }
                 else if ((Math.abs(my.sprite.player.x - enemy.x) < 400) && (Math.abs(my.sprite.player.y - enemy.y) < 150)) {
                     enemy.awake = true; // not awake and player nearby so wake up
                     enemy.anims.play('enemyWalk');
-                    if (enemy.direction) {
-                        enemy.setVelocityX(-50);
-                    }
-                    else {
-                        enemy.setVelocityX(50);
-                    }
+                    this.enemySetVelocity(enemy);
                 }
             }
         }
@@ -416,5 +423,24 @@ class Level1 extends Phaser.Scene {
             }
         });
         return (wallAhead || !groundAhead);
+    }
+
+    hitEnemy(player, enemy) {
+        // game pause
+        // do animation
+        // respawn player
+        console.log("RESPAWNING");
+        player.setVelocity(0, 0);
+        player.setPosition(this.lastAlive[0], this.lastAlive[1])
+        this.enemySetVelocity(enemy);
+        }
+
+    enemySetVelocity(enemy) {
+        if (enemy.direction) {
+            enemy.setVelocityX(-50);
+        }
+        else {
+            enemy.setVelocityX(50);
+        }
     }
 }

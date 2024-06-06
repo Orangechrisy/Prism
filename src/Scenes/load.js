@@ -52,6 +52,14 @@ class Load extends Phaser.Scene {
             frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 344, end: 344 })
         });
 
+        // checkpoint animation
+        this.anims.create({
+            key: 'checkpoint',
+            frameRate: 8,
+            repeat: -1,
+            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 369, end: 370 })
+        });
+
          // ...and pass to the next Scene
         this.scene.start("level1");
     }
