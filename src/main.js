@@ -22,7 +22,7 @@ let config = {
     physics: {
         default: 'arcade',
         arcade: {
-            //debug: true,
+            debug: true,
             gravity: {
                 x: 0,
                 y: 0
@@ -31,7 +31,7 @@ let config = {
     },
     width: 1000,
     height: 600,
-    scene: [Load, Level1],
+    scene: [Title, Load, Level1, Credits],
     fps: { forceSetTimeOut: true, target: 60 }
 }
 
