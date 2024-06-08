@@ -86,7 +86,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 50,
+                    duration: 75,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -116,7 +116,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 50,
+                    duration: 75,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -146,7 +146,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 50,
+                    duration: 75,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -169,7 +169,7 @@ class Level1 extends Phaser.Scene {
         }, this);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(50, 108, "tilemap_sprites", 260);
+        my.sprite.player = this.physics.add.sprite(70, 108, "tilemap_sprites", 260);
         my.sprite.player.setCollideWorldBounds(true);
         my.sprite.player.setMaxVelocity(this.MAX_SPEED, 1000);
 
@@ -185,7 +185,7 @@ class Level1 extends Phaser.Scene {
         this.cam = this.cameras.main;
         this.cam.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cam.setViewport(0, 0, 1000, 600);
-        this.cameras.main.setZoom(2);
+        this.cam.setZoom(2);
         this.cam.startFollow(my.sprite.player, true, .25, .25);
         this.cam.setBackgroundColor('rgba(221, 226, 201, 0.7)');
         console.log("tinting");
@@ -212,6 +212,12 @@ class Level1 extends Phaser.Scene {
             key: "tilemap_sprites",
             frame: 22
         });
+        let colorBlue = Phaser.Display.Color.RGBStringToColor('rgba(66, 69, 153, 0.7)'); // why tf is this so stupid
+        this.unlockBlue[0].setTint(colorBlue.color);
+        let colorOrange = Phaser.Display.Color.RGBStringToColor('rgba(242, 137, 103, 0.8)'); 
+        this.unlockOrange[0].setTint(colorOrange.color);
+        let colorPink = Phaser.Display.Color.RGBStringToColor('rgba(137, 21, 98, 0.7)'); // why tf is this so stupid
+        this.unlockPink[0].setTint(colorPink.color);
         this.physics.world.enable(this.unlockBlue, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.unlockOrange, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.unlockPink, Phaser.Physics.Arcade.STATIC_BODY);
@@ -267,10 +273,7 @@ class Level1 extends Phaser.Scene {
             this.scene.start("endCredits");
         });
 
-        // make group
-        // collider platform
-        // collider player
-        // create enemies in group
+        // enemy collider
         this.groundEnemies = this.physics.add.group();
         this.physics.add.collider(this.groundEnemies, this.ground); // change for all layers
         this.physics.add.collider(my.sprite.player, this.groundEnemies, this.hitEnemy, null, this);
@@ -287,10 +290,11 @@ class Level1 extends Phaser.Scene {
         this.physics.world.enable(this.checkpoints, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.add.overlap(my.sprite.player, this.checkpoints, (obj1, obj2) => {
             this.lastAlive = [obj1.x, obj1.y];
-            console.log(this.lastAlive);
-            // for (let checkpoint of this.checkpoints) {
-            //     checkpoint.anims.pause();
-            // }
+            for (let checkpoint of this.checkpoints) { // turn off the anims for other checkpoints so the player knows which one is active
+                if (checkpoint != obj2) {
+                    checkpoint.anims.pause();
+                }
+            }
             obj2.anims.play('checkpoint', true);
         });
 
@@ -319,10 +323,18 @@ class Level1 extends Phaser.Scene {
                 my.sprite.player.anims.play('idle');
             }
             if(!my.sprite.player.body.blocked.down) {
-                my.sprite.player.anims.play('jump');
+                if (my.sprite.player.body.velocity.x == 0) {
+                    my.sprite.player.anims.play('jumpUp');
+                }
+                else {
+                    my.sprite.player.anims.play('jump');
+                }
             }
             if(my.sprite.player.body.blocked.down && Phaser.Input.Keyboard.JustDown(cursors.up)) {
                 my.sprite.player.body.setVelocityY(this.JUMP_VELOCITY);
+            }
+            if (cursors.down.isDown && my.sprite.player.body.blocked.down) {
+                my.sprite.player.anims.play('sit', true);
             }
 
             // enemy movement
@@ -333,7 +345,7 @@ class Level1 extends Phaser.Scene {
             // if player is far then sleep
             for (let enemy of this.groundEnemies.getChildren()) {
                 if (enemy.awake) {
-                    console.log(enemy.direction);
+                    //console.log(enemy.direction);
                     if ((Math.abs(my.sprite.player.x - enemy.x) > 400) || (Math.abs(my.sprite.player.y - enemy.y) > 150)) {
                         enemy.awake = false; // player too far go sleep
                         enemy.anims.stop(); // how to stop specific animation?

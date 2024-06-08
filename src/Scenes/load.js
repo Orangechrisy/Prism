@@ -19,46 +19,59 @@ class Load extends Phaser.Scene {
     }
 
     create() {
-        this.anims.create({
-            key: 'walk',
-            frameRate: 8,
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 261, end: 263 })
-        });
+        if (!this.anims.exists('walk')) {
+            this.anims.create({
+                key: 'walk',
+                frameRate: 8,
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 261, end: 263 })
+            });
 
-        this.anims.create({
-            key: 'idle',
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 260, end: 260 })
-        });
+            this.anims.create({
+                key: 'idle',
+                repeat: -1,
+                frames: [{key: 'tilemap_sprites', frame: 260}]
+            });
 
-        this.anims.create({
-            key: 'jump',
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 264, end: 264 })
-        });
+            this.anims.create({
+                key: 'jump',
+                repeat: -1,
+                frames: [{key: 'tilemap_sprites', frame: 264}]
+            });
+            this.anims.create({
+                key: 'jumpUp',
+                repeat: -1,
+                frames: [{key: 'tilemap_sprites', frame: 265}]
+            });
 
-        // enemy animations
-        this.anims.create({
-            key: 'enemyWalk',
-            frameRate: 8,
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 341, end: 342 })
-        });
+            this.anims.create({
+                key: 'sit',
+                repeat: -1,
+                frames: [{key: 'tilemap_sprites', frame: 266}]
+            });
 
-        this.anims.create({
-            key: 'enemySleep',
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 344, end: 344 })
-        });
+            // enemy animations
+            this.anims.create({
+                key: 'enemyWalk',
+                frameRate: 8,
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 341, end: 342 })
+            });
 
-        // checkpoint animation
-        this.anims.create({
-            key: 'checkpoint',
-            frameRate: 8,
-            repeat: -1,
-            frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 369, end: 370 })
-        });
+            this.anims.create({
+                key: 'enemySleep',
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 344, end: 344 })
+            });
+
+            // checkpoint animation
+            this.anims.create({
+                key: 'checkpoint',
+                frameRate: 8,
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 369, end: 370 })
+            });
+        }
 
          // ...and pass to the next Scene
         this.scene.start("level1");
