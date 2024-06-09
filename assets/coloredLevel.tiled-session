@@ -9,15 +9,15 @@
     ],
     "fileStates": {
         "coloredLevel.tmx": {
-            "scale": 0.3435267857142857,
-            "selectedLayer": 1,
+            "scale": 1,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 1122.1832358674465,
-                "y": 267.8102664067577
+                "x": 342.5,
+                "y": 140
             }
         },
         "coloredLevel.tmx#monochrome_tilemap_packed": {
-            "scaleInDock": 1,
+            "scaleInDock": 2,
             "scaleInEditor": 1.5
         }
     },

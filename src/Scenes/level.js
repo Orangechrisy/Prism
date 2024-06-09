@@ -45,16 +45,32 @@ class Level1 extends Phaser.Scene {
         this.orangeDeadly = this.map.createLayer("ground-orange-deadly", this.tilemap_main, 0, 0);
         this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
+        // put layers into some arrays for later
         this.groundLayers = [this.ground, this.blue, this.orange, this.pink];
         this.deadlyLayers = [this.groundDeadly, this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
         this.collidingLayers = this.groundLayers.concat(this.deadlyLayers);
         this.colorLayers = [this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
+        // set their colors
+        this.colorGreen = Phaser.Display.Color.RGBStringToColor('rgba(221, 226, 201, 1)'); // why tf is this so stupid
+        this.ground.setTint(this.colorGreen.color);
+        this.groundDeadly.setTint(this.colorGreen.color);
+        this.colorBlue = Phaser.Display.Color.RGBStringToColor('rgba(66, 69, 153, 0.7)'); // might need to make these darker?
+        this.blue.setTint(this.colorBlue.color);
+        this.blueDeadly.setTint(this.colorBlue.color);
+        this.colorOrange = Phaser.Display.Color.RGBStringToColor('rgba(242, 137, 103, 0.8)'); 
+        this.orange.setTint(this.colorOrange.color);
+        this.orangeDeadly.setTint(this.colorOrange.color);
+        this.colorPink = Phaser.Display.Color.RGBStringToColor('rgba(137, 21, 98, 0.7)');
+        this.pink.setTint(this.colorPink.color);
+        this.pinkDeadly.setTint(this.colorPink.color);
+        // turn off others to start
         this.blue.setAlpha(0);
         this.orange.setAlpha(0);
         this.pink.setAlpha(0);
         this.blueDeadly.setAlpha(0);
         this.orangeDeadly.setAlpha(0);
         this.pinkDeadly.setAlpha(0);
+
 
         // changing colors (maybe put in functions outside and just call those functions here)
         this.input.keyboard.on('keydown-ONE', () => { // GREEN
@@ -222,7 +238,7 @@ class Level1 extends Phaser.Scene {
         this.cam.setViewport(0, 0, 1000, 600);
         this.cam.setZoom(2);
         this.cam.startFollow(my.sprite.player, true, .25, .25);
-        this.cam.setBackgroundColor('rgba(221, 226, 201, 0.7)');
+        //this.cam.setBackgroundColor('rgba(221, 226, 201, 0.7)');
         this.cam.bgColorChanged = false;
         let camTextX = this.cam.worldView.x + this.cam.width / 2;
         let camTextY = this.cam.worldView.y + this.cam.height / 3;
@@ -246,12 +262,9 @@ class Level1 extends Phaser.Scene {
             key: "tilemap_sprites",
             frame: 22
         });
-        let colorBlue = Phaser.Display.Color.RGBStringToColor('rgba(66, 69, 153, 0.7)'); // why tf is this so stupid
-        this.unlockBlue[0].setTint(colorBlue.color);
-        let colorOrange = Phaser.Display.Color.RGBStringToColor('rgba(242, 137, 103, 0.8)'); 
-        this.unlockOrange[0].setTint(colorOrange.color);
-        let colorPink = Phaser.Display.Color.RGBStringToColor('rgba(137, 21, 98, 0.7)'); // why tf is this so stupid
-        this.unlockPink[0].setTint(colorPink.color);
+        this.unlockBlue[0].setTint(this.colorBlue.color);
+        this.unlockOrange[0].setTint(this.colorOrange.color);
+        this.unlockPink[0].setTint(this.colorPink.color);
         this.physics.world.enable(this.unlockBlue, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.unlockOrange, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.unlockPink, Phaser.Physics.Arcade.STATIC_BODY);
@@ -332,7 +345,10 @@ class Level1 extends Phaser.Scene {
             obj2.anims.play('checkpoint', true);
         });
 
+        // set all the things to base color as needed
+        this.setColors(this.colorGreen.color);
     }
+
     update() {
         if (!this.pauseScene) {
             this.colorCooldown -= 1;
@@ -397,10 +413,11 @@ class Level1 extends Phaser.Scene {
         }
     }
 
+    // change the color to green
     changeToGreen() {
         this.greenFlag = true;
         this.blueFlag = this.orangeFlag = this.pinkFlag = false;
-        this.cam.setBackgroundColor('rgba(221, 226, 201, 0.7)');
+        this.setColors(this.colorGreen.color);
         this.colorLayers.forEach(layer => {
             layer.forEachTile(tile => {
                 if (tile.properties["ground"] || tile.properties["deadly"]) {
@@ -413,10 +430,11 @@ class Level1 extends Phaser.Scene {
         // trigger animation?
     }
 
+    // change the color to blue
     changeToBlue() {
         this.blueFlag = true;
         this.greenFlag = this.orangeFlag = this.pinkFlag = false;
-        this.cam.setBackgroundColor('rgba(66, 69, 153, 0.7)');
+        this.setColors(this.colorBlue.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.blue && layer != this.blueDeadly) {
                 layer.forEachTile(tile => {
@@ -438,10 +456,11 @@ class Level1 extends Phaser.Scene {
         this.cam.bgColorChanged = true;
     }
 
+    // change the color to orange
     changeToOrange() {
         this.orangeFlag = true;
         this.blueFlag = this.greenFlag = this.pinkFlag = false;
-        this.cam.setBackgroundColor('rgba(242, 137, 103, 0.8)');
+        this.setColors(this.colorOrange.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.orange && layer != this.orangeDeadly) {
                 layer.forEachTile(tile => {
@@ -463,10 +482,11 @@ class Level1 extends Phaser.Scene {
         this.cam.bgColorChanged = true;
     }
 
+    // change the color to pink
     changeToPink() {
         this.pinkFlag = true;
         this.blueFlag = this.orangeFlag = this.greenFlag = false;
-        this.cam.setBackgroundColor('rgba(137, 21, 98, 0.7)');
+        this.setColors(this.colorPink.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.pink && layer != this.pinkDeadly) {
                 layer.forEachTile(tile => {
@@ -488,6 +508,19 @@ class Level1 extends Phaser.Scene {
         this.cam.bgColorChanged = true;
     }
 
+    // sets all the things that need to be changed colored in each swap
+    setColors(color) {
+        my.sprite.player.setTint(color);
+        this.groundEnemies.setTint(color);
+        this.ground.setTint(color);
+        this.groundDeadly.setTint(color);
+        this.endItem[0].setTint(color);
+        this.checkpoints.forEach(checkpoint => {
+            checkpoint.setTint(color);
+        });
+    }
+
+    // the enemy AI so it turns around when it should
     enemyTurnAround(enemy) {
         let wallAhead = false;
         let groundAhead = false;
@@ -516,6 +549,7 @@ class Level1 extends Phaser.Scene {
         return (wallAhead || !groundAhead);
     }
 
+    // player hit enemy
     hitEnemy(player, enemy) {
         // game pause
         // do animation
@@ -526,6 +560,7 @@ class Level1 extends Phaser.Scene {
         this.enemySetVelocity(enemy);
     }
 
+    // set enemy velocity
     enemySetVelocity(enemy) {
         if (enemy.direction) {
             enemy.setVelocityX(-50);
@@ -535,6 +570,7 @@ class Level1 extends Phaser.Scene {
         }
     }
 
+    // player hit deadly tile
     hitObstacle(player, obstacle) {
         // game pause
         // do animation
