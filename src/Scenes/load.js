@@ -16,6 +16,9 @@ class Load extends Phaser.Scene {
         this.load.image("main_tiles", "monochrome_tilemap_packed.png");
         this.load.tilemapTiledJSON("coloredLevel", "coloredLevel.tmj");   // Tilemap in JSON
         this.load.image("background", "background.png");
+
+        // Load font
+        //this.load.bitmapFont('publicPixel', 'publicPixel_0.png', 'publicPixel.fnt');
     }
 
     create() {
