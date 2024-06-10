@@ -11,8 +11,8 @@ class Level1 extends Phaser.Scene {
         this.JUMP_VELOCITY = -300;
         this.MAX_SPEED = 200;
 
-        this.colorCooldown = 15;
-        this.colorCooldownMax = 15;
+        this.colorCooldown = 5;
+        this.colorCooldownMax = 5;
         this.greenFlag = true;
         this.blueFlag = false;
         this.orangeFlag = false;
@@ -23,6 +23,11 @@ class Level1 extends Phaser.Scene {
         this.pauseScene = false;
 
         this.lastAlive = [50, 108];
+    }
+
+    preload() {
+        // Load animated tiles
+        this.load.scenePlugin('AnimatedTiles', './lib/AnimatedTiles.js', 'animatedTiles', 'animatedTiles');
     }
 
     create() {
@@ -39,6 +44,7 @@ class Level1 extends Phaser.Scene {
         this.background = this.map.createLayer("background", this.tilemap_main, 0, 0);
         this.ground = this.map.createLayer("ground", this.tilemap_main, 0, 0);
         this.groundDeadly = this.map.createLayer("ground-deadly", this.tilemap_main, 0, 0);
+        this.groundHiding = this.map.createLayer("ground-hiding", this.tilemap_main, 0, 0);
         this.blue = this.map.createLayer("ground-blue", this.tilemap_main, 0, 0);
         this.blueDeadly = this.map.createLayer("ground-blue-deadly", this.tilemap_main, 0, 0);
         this.orange = this.map.createLayer("ground-orange", this.tilemap_main, 0, 0);
@@ -46,10 +52,10 @@ class Level1 extends Phaser.Scene {
         this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
         // put layers into some arrays for later
-        this.groundLayers = [this.ground, this.blue, this.orange, this.pink];
+        this.groundLayers = [this.ground, this.groundHiding, this.blue, this.orange, this.pink];
         this.deadlyLayers = [this.groundDeadly, this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
         this.collidingLayers = this.groundLayers.concat(this.deadlyLayers);
-        this.colorLayers = [this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
+        this.colorLayers = [this.groundDeadly, this.groundHiding, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
         // set their colors
         this.colorGreen = Phaser.Display.Color.RGBStringToColor('rgba(221, 226, 201, 1)'); // why tf is this so stupid
         this.ground.setTint(this.colorGreen.color);
@@ -71,6 +77,8 @@ class Level1 extends Phaser.Scene {
         this.orangeDeadly.setAlpha(0);
         this.pinkDeadly.setAlpha(0);
 
+        this.animatedTiles.init(this.map);
+
 
         // changing colors (maybe put in functions outside and just call those functions here)
         this.input.keyboard.on('keydown-ONE', () => { // GREEN
@@ -81,7 +89,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 50,
+                    duration: 100,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -111,7 +119,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 75,
+                    duration: 100,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -141,7 +149,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 75,
+                    duration: 100,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -171,7 +179,7 @@ class Level1 extends Phaser.Scene {
                 // do animation
                 this.tweens.add({
                     targets: this.cam,
-                    duration: 75,
+                    duration: 100,
                     zoom: 2.2,
                     yoyo: true,
                     onStart: () => {
@@ -194,7 +202,7 @@ class Level1 extends Phaser.Scene {
         }, this);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(70, 108, "tilemap_sprites", 260);
+        my.sprite.player = this.physics.add.sprite(80, 108, "tilemap_sprites", 260); // 80, 108?
         my.sprite.player.setCollideWorldBounds(true);
         my.sprite.player.setMaxVelocity(this.MAX_SPEED, 1000);
         my.sprite.player.setDepth(2);
@@ -208,6 +216,11 @@ class Level1 extends Phaser.Scene {
             });
         });
         this.ground.forEachTile(tile => {
+            if (tile.properties["ground"]) {
+                tile.setCollision(true, true, true, true);
+            }
+        });
+        this.groundHiding.forEachTile(tile => {
             if (tile.properties["ground"]) {
                 tile.setCollision(true, true, true, true);
             }
@@ -227,10 +240,12 @@ class Level1 extends Phaser.Scene {
             }
         });
         this.physics.add.collider(my.sprite.player, this.deadlyLayers, this.hitObstacle, null, this);
-        // this.scene.physics.world.collide(my.sprite.player, this.groundDeadly, function(obj1, obj2) {
-        //     this.hitObstacle(obj1, obj2);
-        // });
-        //this.physics.add.collider(my.sprite.player, this.groundEnemies, this.hitObstacle, null, this);
+
+        this.ground.forEachTile(tile => {
+            if (tile.properties["platform"]) {
+                tile.setCollision(false, false, true, false);
+            }
+        });
 
         // camera stuff
         this.cam = this.cameras.main;
@@ -335,6 +350,7 @@ class Level1 extends Phaser.Scene {
             frame: 369
         });
         this.physics.world.enable(this.checkpoints, Phaser.Physics.Arcade.STATIC_BODY);
+        this.colorYellow = Phaser.Display.Color.RGBStringToColor('rgba(255, 216, 0, 0.7)');
         this.physics.add.overlap(my.sprite.player, this.checkpoints, (obj1, obj2) => {
             this.lastAlive = [obj1.x, obj1.y];
             for (let checkpoint of this.checkpoints) { // turn off the anims for other checkpoints so the player knows which one is active
@@ -343,6 +359,12 @@ class Level1 extends Phaser.Scene {
                 }
             }
             obj2.anims.play('checkpoint', true);
+            // obj2.setPipeline('Light2D');
+            // let checkpointLight = this.lights.addLight(obj2.x, obj2.y, 100).setIntensity(2);
+            // this.lights.enable().setAmbientColor(this.colorYellow.color);
+        });
+        this.checkpoints.forEach(checkpoint => {
+            checkpoint.setTint(this.colorYellow.color);
         });
 
         // set all the things to base color as needed
@@ -391,7 +413,7 @@ class Level1 extends Phaser.Scene {
             for (let enemy of this.groundEnemies.getChildren()) {
                 if (enemy.awake) {
                     //console.log(enemy.direction);
-                    if ((Math.abs(my.sprite.player.x - enemy.x) > 400) || (Math.abs(my.sprite.player.y - enemy.y) > 150)) {
+                    if ((Math.abs(my.sprite.player.x - enemy.x) > 220) || (Math.abs(my.sprite.player.y - enemy.y) > 150)) {
                         enemy.awake = false; // player too far go sleep
                         enemy.anims.stop(); // how to stop specific animation?
                         enemy.anims.play('enemySleep');
@@ -404,7 +426,7 @@ class Level1 extends Phaser.Scene {
                         }
                     }
                 }
-                else if ((Math.abs(my.sprite.player.x - enemy.x) < 400) && (Math.abs(my.sprite.player.y - enemy.y) < 150)) {
+                else if ((Math.abs(my.sprite.player.x - enemy.x) < 220) && (Math.abs(my.sprite.player.y - enemy.y) < 150)) {
                     enemy.awake = true; // not awake and player nearby so wake up
                     enemy.anims.play('enemyWalk');
                     this.enemySetVelocity(enemy);
@@ -419,12 +441,25 @@ class Level1 extends Phaser.Scene {
         this.blueFlag = this.orangeFlag = this.pinkFlag = false;
         this.setColors(this.colorGreen.color);
         this.colorLayers.forEach(layer => {
-            layer.forEachTile(tile => {
-                if (tile.properties["ground"] || tile.properties["deadly"]) {
-                    tile.setCollision(false, false, false, false);
-                }
-            });
-            layer.setAlpha(0);
+            if (layer != this.groundHiding && layer != this.groundDeadly) {
+                layer.forEachTile(tile => {
+                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
+                        tile.setCollision(false, false, false, false);
+                    }
+                });
+                layer.setAlpha(0);
+            }
+            else {
+                layer.forEachTile(tile => {
+                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                        tile.setCollision(true, true, true, true);
+                    }
+                    if (tile.properties["platform"]) {
+                        tile.setCollision(false, false, true, false);
+                    }
+                });
+                layer.setAlpha(1);
+            }
         });
         this.cam.bgColorChanged = true;
         // trigger animation?
@@ -438,7 +473,7 @@ class Level1 extends Phaser.Scene {
         this.colorLayers.forEach(layer => {
             if (layer != this.blue && layer != this.blueDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
@@ -448,6 +483,9 @@ class Level1 extends Phaser.Scene {
                 layer.forEachTile(tile => {
                     if (tile.properties["ground"] || tile.properties["deadly"]) {
                         tile.setCollision(true, true, true, true);
+                    }
+                    if (tile.properties["platform"]) {
+                        tile.setCollision(false, false, true, false);
                     }
                 });
                 layer.setAlpha(1);
@@ -464,7 +502,7 @@ class Level1 extends Phaser.Scene {
         this.colorLayers.forEach(layer => {
             if (layer != this.orange && layer != this.orangeDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
@@ -474,6 +512,9 @@ class Level1 extends Phaser.Scene {
                 layer.forEachTile(tile => {
                     if (tile.properties["ground"] || tile.properties["deadly"]) {
                         tile.setCollision(true, true, true, true);
+                    }
+                    if (tile.properties["platform"]) {
+                        tile.setCollision(false, false, true, false);
                     }
                 });
                 layer.setAlpha(1);
@@ -490,7 +531,7 @@ class Level1 extends Phaser.Scene {
         this.colorLayers.forEach(layer => {
             if (layer != this.pink && layer != this.pinkDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
@@ -500,6 +541,9 @@ class Level1 extends Phaser.Scene {
                 layer.forEachTile(tile => {
                     if (tile.properties["ground"] || tile.properties["deadly"]) {
                         tile.setCollision(true, true, true, true);
+                    }
+                    if (tile.properties["platform"]) {
+                        tile.setCollision(false, false, true, false);
                     }
                 });
                 layer.setAlpha(1);
@@ -515,9 +559,8 @@ class Level1 extends Phaser.Scene {
         this.ground.setTint(color);
         this.groundDeadly.setTint(color);
         this.endItem[0].setTint(color);
-        this.checkpoints.forEach(checkpoint => {
-            checkpoint.setTint(color);
-        });
+        this.background.setTint(color);
+        this.groundHiding.setTint(color);
     }
 
     // the enemy AI so it turns around when it should

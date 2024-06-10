@@ -18,9 +18,10 @@
         },
         "coloredLevel.tmx#monochrome_tilemap_packed": {
             "scaleInDock": 2,
-            "scaleInEditor": 1.5
+            "scaleInEditor": 2
         }
     },
+    "frame.defaultDuration": 200,
     "last.exportedFilePath": "C:/Users/chris/Documents/cmpm120/FinalGame/assets",
     "last.imagePath": "C:/Users/chris/Documents/cmpm120/FinalGame/assets",
     "map.height": 60,
