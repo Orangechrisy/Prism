@@ -22,7 +22,7 @@ class Level1 extends Phaser.Scene {
         this.pinkUnlock = false;
         this.pauseScene = false;
 
-        this.lastAlive = [50, 108];
+        this.lastAlive = [80, 100];
     }
 
     preload() {
@@ -51,7 +51,9 @@ class Level1 extends Phaser.Scene {
         this.orangeDeadly = this.map.createLayer("ground-orange-deadly", this.tilemap_main, 0, 0);
         this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
-        // put layers into some arrays for later
+        this.deadZones = this.map.getObjectLayer("dead-zones");
+        console.log(this.deadZones);
+;        // put layers into some arrays for later
         this.groundLayers = [this.ground, this.groundHiding, this.blue, this.orange, this.pink];
         this.deadlyLayers = [this.groundDeadly, this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
         this.collidingLayers = this.groundLayers.concat(this.deadlyLayers);
@@ -94,6 +96,7 @@ class Level1 extends Phaser.Scene {
                     yoyo: true,
                     onStart: () => {
                         this.pauseScene = true;
+                        this.inDeadZoneCheck(false);
                         this.physics.pause();
                     },
                     onUpdate: (tween) => {
@@ -124,6 +127,7 @@ class Level1 extends Phaser.Scene {
                     yoyo: true,
                     onStart: () => {
                         this.pauseScene = true;
+                        this.inDeadZoneCheck(true);
                         this.physics.pause();
                     },
                     onUpdate: (tween) => {
@@ -154,6 +158,7 @@ class Level1 extends Phaser.Scene {
                     yoyo: true,
                     onStart: () => {
                         this.pauseScene = true;
+                        this.inDeadZoneCheck(false);
                         this.physics.pause();
                     },
                     onUpdate: (tween) => {
@@ -184,6 +189,7 @@ class Level1 extends Phaser.Scene {
                     yoyo: true,
                     onStart: () => {
                         this.pauseScene = true;
+                        this.inDeadZoneCheck(false);
                         this.physics.pause();
                     },
                     onUpdate: (tween) => {
@@ -219,10 +225,16 @@ class Level1 extends Phaser.Scene {
             if (tile.properties["ground"]) {
                 tile.setCollision(true, true, true, true);
             }
+            if (tile.properties["platform"]) {
+                tile.setCollision(false, false, true, false);
+            }
         });
         this.groundHiding.forEachTile(tile => {
             if (tile.properties["ground"]) {
                 tile.setCollision(true, true, true, true);
+            }
+            if (tile.properties["platform"]) {
+                tile.setCollision(false, false, true, false);
             }
         });
         this.physics.add.collider(my.sprite.player, this.groundLayers);
@@ -240,12 +252,6 @@ class Level1 extends Phaser.Scene {
             }
         });
         this.physics.add.collider(my.sprite.player, this.deadlyLayers, this.hitObstacle, null, this);
-
-        this.ground.forEachTile(tile => {
-            if (tile.properties["platform"]) {
-                tile.setCollision(false, false, true, false);
-            }
-        });
 
         // camera stuff
         this.cam = this.cameras.main;
@@ -283,10 +289,35 @@ class Level1 extends Phaser.Scene {
         this.physics.world.enable(this.unlockBlue, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.unlockOrange, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.world.enable(this.unlockPink, Phaser.Physics.Arcade.STATIC_BODY);
-        this.physics.add.overlap(my.sprite.player, this.unlockBlue, (obj1, obj2) => {
-            obj2.destroy();
+        let emitterBlue = this.add.particles(this.unlockBlue.x, this.unlockBlue.y, 'pixel', {
+            tint: this.colorBlue.color,
+            scale: { start: 3, end: 2},
+            alpha: { start: 1, end: 0.5},
+            speed: { start: 100, end: 20, random: true},
+            lifespan: {min: 500, max: 750, random: true},
+            emitting: false
+        });
+        let emitterOrange = this.add.particles(this.unlockOrange.x, this.unlockOrange.y, 'pixel', {
+            tint: this.colorOrange.color,
+            scale: { start: 3, end: 2},
+            alpha: { start: 1, end: 0.5},
+            speed: { start: 100, end: 20, random: true},
+            lifespan: {min: 500, max: 750, random: true},
+            emitting: false
+        });
+        let emitterPink = this.add.particles(this.unlockPink.x, this.unlockPink.y, 'pixel', {
+            tint: this.colorPink.color,
+            scale: { start: 3, end: 2},
+            alpha: { start: 1, end: 0.5},
+            speed: { start: 100, end: 20, random: true},
+            lifespan: {min: 500, max: 750, random: true},
+            emitting: false
+        });
+        this.physics.add.overlap(my.sprite.player, this.unlockBlue, (player, unlockBlue) => {
+            emitterBlue.emitParticleAt(unlockBlue.x, unlockBlue.y, 50);
+
+            unlockBlue.destroy();
             this.blueUnlock = true;
-            // get better font
             this.blueUnlockText = this.startText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
             "Unlocked Blue, press 2 to swap\n(press 1 to go back to green)", 24, 1)
             .setOrigin(0.5).setFontSize(12).setScrollFactor(0, 0);
@@ -299,8 +330,9 @@ class Level1 extends Phaser.Scene {
             // this.drankEffects(this.DRANKS);
             // this.dranking.play();
         });
-        this.physics.add.overlap(my.sprite.player, this.unlockOrange, (obj1, obj2) => {
-            obj2.destroy();
+        this.physics.add.overlap(my.sprite.player, this.unlockOrange, (player, unlockOrange) => {
+            emitterOrange.emitParticleAt(unlockOrange.x, unlockOrange.y, 50);
+            unlockOrange.destroy();
             this.orangeUnlock = true;
             this.orangeUnlockText = this.startText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
             "Unlocked Orange, press 3 to swap", 24, 1)
@@ -311,8 +343,9 @@ class Level1 extends Phaser.Scene {
                 callbackScope: this.orangeUnlockText
             });
         });
-        this.physics.add.overlap(my.sprite.player, this.unlockPink, (obj1, obj2) => {
-            obj2.destroy();
+        this.physics.add.overlap(my.sprite.player, this.unlockPink, (player, unlockPink) => {
+            emitterPink.emitParticleAt(unlockPink.x, unlockPink.y, 50);
+            unlockPink.destroy();
             this.pinkUnlock = true;
             this.pinkUnlockText = this.startText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
             "Unlocked Pink, press 4 to swap", 24, 1)
@@ -367,6 +400,15 @@ class Level1 extends Phaser.Scene {
             checkpoint.setTint(this.colorYellow.color);
         });
 
+        this.emitterDeath = this.add.particles(0, 0, 'pixel', {
+            tint: [this.colorGreen.color, this.colorBlue.color, this.colorOrange.color, this.colorPink.color],
+            scale: { start: 3, end: 2},
+            alpha: { start: 1, end: 0.5},
+            speed: { start: 100, end: 20, random: true},
+            lifespan: {min: 500, max: 750, random: true},
+            emitting: false
+        });
+
         // set all the things to base color as needed
         this.setColors(this.colorGreen.color);
     }
@@ -374,6 +416,7 @@ class Level1 extends Phaser.Scene {
     update() {
         if (!this.pauseScene) {
             this.colorCooldown -= 1;
+            //console.log(this.game.loop.actualFps);
 
             // movement
             if(cursors.left.isDown) {
@@ -594,13 +637,20 @@ class Level1 extends Phaser.Scene {
 
     // player hit enemy
     hitEnemy(player, enemy) {
-        // game pause
-        // do animation
-        // respawn player
-        console.log("RESPAWNING");
-        player.setVelocity(0, 0);
-        player.setPosition(this.lastAlive[0], this.lastAlive[1]);
-        this.enemySetVelocity(enemy);
+        if (player.visible == true) {
+            player.setVelocity(0, 0);
+            player.setAcceleration(0, 0);
+            player.setVisible(0);
+            this.physics.world.gravity.y = 0;
+            this.cam.stopFollow();
+            this.emitterDeath.emitParticleAt(player.x, player.y, 50);
+            this.time.addEvent({
+                delay: 1000,
+                callback: this.respawn,
+                callbackScope: this
+            });
+            this.enemySetVelocity(enemy);
+        }
     }
 
     // set enemy velocity
@@ -615,11 +665,43 @@ class Level1 extends Phaser.Scene {
 
     // player hit deadly tile
     hitObstacle(player, obstacle) {
-        // game pause
-        // do animation
-        // respawn player
-        console.log("RESPAWNING");
-        player.setVelocity(0, 0);
-        player.setPosition(this.lastAlive[0], this.lastAlive[1]);
+        if (player.visible == true) {
+            player.setVelocity(0, 0);
+            player.setAcceleration(0, 0);
+            player.setVisible(0);
+            this.physics.world.gravity.y = 0;
+            this.cam.stopFollow();
+            this.emitterDeath.emitParticleAt(player.x, player.y, 75);
+            this.time.addEvent({
+                delay: 1000,
+                callback: this.respawn,
+                callbackScope: this
+            });
+        }
+    }
+
+    respawn() {
+        my.sprite.player.setPosition(this.lastAlive[0], this.lastAlive[1]);
+        my.sprite.player.setVisible(1);
+        this.physics.world.gravity.y = 800;
+        this.cam.startFollow(my.sprite.player, true, .25, .25);
+    }
+
+    inDeadZoneCheck(boolZoneCheck) {
+        let inDeadZone = false;
+        this.deadZones.objects.forEach(rectangle => {
+            const bounds = new Phaser.Geom.Rectangle(rectangle.x + 1, rectangle.y + 1, rectangle.width - 2, rectangle.height - 2);
+            if (Phaser.Geom.Intersects.RectangleToRectangle(my.sprite.player.getBounds(), bounds)) {
+                if (rectangle.name == "deadZoneBlueCase" && !boolZoneCheck) {
+                    inDeadZone = false;
+                }
+                else {
+                    inDeadZone = true;
+                }
+            }
+        });
+        if (inDeadZone == true) {
+            this.hitObstacle(my.sprite.player);
+        }
     }
 }

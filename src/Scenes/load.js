@@ -17,6 +17,9 @@ class Load extends Phaser.Scene {
         this.load.image("main_tiles", "monochrome_tilemap_packed.png");
         this.load.tilemapTiledJSON("coloredLevel", "coloredLevel.tmj");   // Tilemap in JSON
         this.load.image("background", "background.png");
+
+        // Load particle (single pixel lol)
+        this.load.image('pixel', '1x1.png');
     }
 
     create() {
