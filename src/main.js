@@ -31,7 +31,7 @@ let config = {
     },
     width: 1000,
     height: 600,
-    scene: [Title, Load, Level1, Credits],
+    scene: [Title, Load, Level1, Credits, Pause, Sign],
     fps: { forceSetTimeOut: true, target: 60 }
 }
 

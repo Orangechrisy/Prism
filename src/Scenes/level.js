@@ -1,6 +1,6 @@
 class Level1 extends Phaser.Scene {
     constructor() {
-        super("level1");
+        super("level");
     }
 
     init() {
@@ -23,6 +23,8 @@ class Level1 extends Phaser.Scene {
         this.pauseScene = false;
 
         this.lastAlive = [80, 100];
+
+        this.signOverlapFlag = false;
     }
 
     preload() {
@@ -52,7 +54,8 @@ class Level1 extends Phaser.Scene {
         this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
         this.deadZones = this.map.getObjectLayer("dead-zones");
-        console.log(this.deadZones);
+        this.signs = this.map.getObjectLayer("signs");
+        console.log(this.signs);
 ;        // put layers into some arrays for later
         this.groundLayers = [this.ground, this.groundHiding, this.blue, this.orange, this.pink];
         this.deadlyLayers = [this.groundDeadly, this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
@@ -318,7 +321,7 @@ class Level1 extends Phaser.Scene {
 
             unlockBlue.destroy();
             this.blueUnlock = true;
-            this.blueUnlockText = this.startText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
+            this.blueUnlockText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
             "Unlocked Blue, press 2 to swap\n(press 1 to go back to green)", 24, 1)
             .setOrigin(0.5).setFontSize(12).setScrollFactor(0, 0);
             this.time.addEvent({
@@ -334,7 +337,7 @@ class Level1 extends Phaser.Scene {
             emitterOrange.emitParticleAt(unlockOrange.x, unlockOrange.y, 50);
             unlockOrange.destroy();
             this.orangeUnlock = true;
-            this.orangeUnlockText = this.startText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
+            this.orangeUnlockText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
             "Unlocked Orange, press 3 to swap", 24, 1)
             .setOrigin(0.5).setFontSize(12).setScrollFactor(0, 0);
             this.time.addEvent({
@@ -347,7 +350,7 @@ class Level1 extends Phaser.Scene {
             emitterPink.emitParticleAt(unlockPink.x, unlockPink.y, 50);
             unlockPink.destroy();
             this.pinkUnlock = true;
-            this.pinkUnlockText = this.startText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
+            this.pinkUnlockText = this.add.bitmapText(camTextX, camTextY, "publicPixel",
             "Unlocked Pink, press 4 to swap", 24, 1)
             .setOrigin(0.5).setFontSize(12).setScrollFactor(0, 0);
             this.time.addEvent({
@@ -392,9 +395,6 @@ class Level1 extends Phaser.Scene {
                 }
             }
             obj2.anims.play('checkpoint', true);
-            // obj2.setPipeline('Light2D');
-            // let checkpointLight = this.lights.addLight(obj2.x, obj2.y, 100).setIntensity(2);
-            // this.lights.enable().setAmbientColor(this.colorYellow.color);
         });
         this.checkpoints.forEach(checkpoint => {
             checkpoint.setTint(this.colorYellow.color);
@@ -409,11 +409,56 @@ class Level1 extends Phaser.Scene {
             emitting: false
         });
 
+        // pause menu key
+        this.pauseMenu = this.input.keyboard.addKey("P");
+
+        // sign interaction
+        //this.signView = this.input.keyboard.addKey("E");
+        this.signGroup = this.map.createFromObjects("signs", {
+            key: "tilemap_sprites",
+            frame: 77
+        });
+        console.log(this.signGroup);
+        this.physics.world.enable(this.signGroup, Phaser.Physics.Arcade.STATIC_BODY);
+        this.physics.add.overlap(my.sprite.player, this.signGroup, (player, sign) => {
+            if (this.signOverlapFlag == false) {
+                this.signOverlapFlag = true;
+                this.signText = this.add.bitmapText(sign.x, sign.y + 24, "publicPixel", "E", 8, 1).setOrigin(0.5);
+            }
+            this.input.keyboard.on('keydown-E', () => {
+                if (this.scene.isActive("level")) {
+                    console.log("scene active");
+                }
+                console.log(sign.name);
+                this.scene.launch("sign", sign.name);
+                this.scene.pause("level");
+            }, this);
+        });
+        this.signGroup.forEach(sign => {
+            sign.setTint(this.colorYellow.color);
+        });
+
         // set all the things to base color as needed
         this.setColors(this.colorGreen.color);
     }
 
     update() {
+        if (Phaser.Input.Keyboard.JustDown(this.pauseMenu)) {
+            this.scene.launch("pause");
+            this.scene.pause();
+        }
+
+        let anyOverlap = false;
+        this.signGroup.forEach (sign => {
+            if (this.physics.overlap(my.sprite.player, sign)) {
+                anyOverlap = true;
+            }
+        });
+        if (this.signText && !anyOverlap) {
+            this.signOverlapFlag = false;
+            this.signText.destroy();
+        }
+
         if (!this.pauseScene) {
             this.colorCooldown -= 1;
             //console.log(this.game.loop.actualFps);
@@ -612,21 +657,21 @@ class Level1 extends Phaser.Scene {
         let groundAhead = false;
         this.collidingLayers.forEach(layer => {
             if (layer.alpha != 0) { // possibly check tile properties somewhere?
-                if (enemy.direction) {
+                if (enemy.direction) { // going left
                     if (layer.getTileAtWorldXY((enemy.x - enemy.displayWidth/2 - 1), enemy.y)) {
                         wallAhead = true;
                         return false;
                     }
-                    else if (layer.getTileAtWorldXY((enemy.x - enemy.displayWidth/2), (enemy.y + enemy.displayHeight/2 + 1))) {
+                    else if (layer.getTileAtWorldXY((enemy.x - enemy.displayWidth/2 - 1), (enemy.y + enemy.displayHeight/2 + 1))) {
                         groundAhead = true;
                     }
                 }
-                else {
+                else { // going right
                     if (layer.getTileAtWorldXY((enemy.x + enemy.displayWidth/2 + 1), enemy.y)) {
                         wallAhead = true;
                         return false;
                     }
-                    else if (layer.getTileAtWorldXY((enemy.x + enemy.displayWidth/2), (enemy.y + enemy.displayHeight/2 + 1))) {
+                    else if (layer.getTileAtWorldXY((enemy.x + enemy.displayWidth/2 + 1), (enemy.y + enemy.displayHeight/2 + 1))) {
                         groundAhead = true;
                     }
                 }

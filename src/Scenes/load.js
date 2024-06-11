@@ -19,7 +19,9 @@ class Load extends Phaser.Scene {
         this.load.image("background", "background.png");
 
         // Load particle (single pixel lol)
-        this.load.image('pixel', '1x1.png');
+        this.load.image("pixel", "1x1.png");
+        this.load.image("pauseMenu", "pauseMenu.png");
+        this.load.image("signShade", "shade.png");
     }
 
     create() {
@@ -78,7 +80,7 @@ class Load extends Phaser.Scene {
         }
 
          // ...and pass to the next Scene
-        this.scene.start("level1");
+        this.scene.start("level");
     }
 
     // Never get here since a new scene is started in create()
