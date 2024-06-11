@@ -57,17 +57,46 @@ class Load extends Phaser.Scene {
             });
 
             // enemy animations
+            // enemy variant 1
             this.anims.create({
-                key: 'enemyWalk',
+                key: 'enemyWalk1',
+                frameRate: 8,
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 321, end: 322 })
+            });
+
+            this.anims.create({
+                key: 'enemySleep1',
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 324, end: 324 })
+            });
+
+            // enemy variant 2
+            this.anims.create({
+                key: 'enemyWalk2',
                 frameRate: 8,
                 repeat: -1,
                 frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 341, end: 342 })
             });
 
             this.anims.create({
-                key: 'enemySleep',
+                key: 'enemySleep2',
                 repeat: -1,
                 frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 344, end: 344 })
+            });
+
+            // enemy variant 3
+            this.anims.create({
+                key: 'enemyWalk3',
+                frameRate: 8,
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 361, end: 362 })
+            });
+
+            this.anims.create({
+                key: 'enemySleep3',
+                repeat: -1,
+                frames: this.anims.generateFrameNumbers('tilemap_sprites', { start: 364, end: 364 })
             });
 
             // checkpoint animation

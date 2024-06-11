@@ -20,6 +20,8 @@ class Level1 extends Phaser.Scene {
         this.blueUnlock = false;
         this.orangeUnlock = false;
         this.pinkUnlock = false;
+        this.currentColor = 1; // 1-4: green, blue, orange, pink
+
         this.pauseScene = false;
 
         this.lastAlive = [80, 100];
@@ -54,8 +56,10 @@ class Level1 extends Phaser.Scene {
         this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
         this.deadZones = this.map.getObjectLayer("dead-zones");
-        this.signs = this.map.getObjectLayer("signs");
-        console.log(this.signs);
+        this.greenSpikes = this.map.getObjectLayer("ground-deadly-rect");
+        this.blueSpikes = this.map.getObjectLayer("ground-blue-deadly-rect");
+        this.orangeSpikes = this.map.getObjectLayer("ground-orange-deadly-rect");
+        this.pinkSpikes = this.map.getObjectLayer("ground-pink-deadly-rect");
 ;        // put layers into some arrays for later
         this.groundLayers = [this.ground, this.groundHiding, this.blue, this.orange, this.pink];
         this.deadlyLayers = [this.groundDeadly, this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
@@ -375,9 +379,7 @@ class Level1 extends Phaser.Scene {
         this.groundEnemies = this.physics.add.group();
         this.physics.add.collider(this.groundEnemies, this.ground); // change for all layers
         this.physics.add.collider(my.sprite.player, this.groundEnemies, this.hitEnemy, null, this);
-        let enemy = this.groundEnemies.create(350, 190, "tilemap_sprites", 344); // put in separate function later to make all the enemies at once
-        enemy.direction = true; // left is true, right is false
-        enemy.awake = false;
+        this.createEnemies();
         
         // checkpoint
         this.checkpoints = this.map.createFromObjects("items", {
@@ -420,23 +422,25 @@ class Level1 extends Phaser.Scene {
         });
         console.log(this.signGroup);
         this.physics.world.enable(this.signGroup, Phaser.Physics.Arcade.STATIC_BODY);
+        this.currentSign = null;
         this.physics.add.overlap(my.sprite.player, this.signGroup, (player, sign) => {
             if (this.signOverlapFlag == false) {
                 this.signOverlapFlag = true;
-                this.signText = this.add.bitmapText(sign.x, sign.y + 24, "publicPixel", "E", 8, 1).setOrigin(0.5);
+                this.signText = this.add.bitmapText(sign.x, sign.y + 24, "publicPixel", "Press E", 8, 1).setOrigin(0.5);
             }
-            this.input.keyboard.on('keydown-E', () => {
-                if (this.scene.isActive("level")) {
-                    console.log("scene active");
-                }
-                console.log(sign.name);
-                this.scene.launch("sign", sign.name);
-                this.scene.pause("level");
-            }, this);
+            this.currentSign = sign;
         });
+        this.input.keyboard.on('keydown-E', () => { // fix stuff up here
+            if (this.currentSign) {
+                console.log("sign name:", this.currentSign.name);
+                this.scene.launch("sign", this.currentSign.name);
+                this.scene.pause("level");
+            }
+        }, this);
         this.signGroup.forEach(sign => {
             sign.setTint(this.colorYellow.color);
         });
+        
 
         // set all the things to base color as needed
         this.setColors(this.colorGreen.color);
@@ -456,6 +460,7 @@ class Level1 extends Phaser.Scene {
         });
         if (this.signText && !anyOverlap) {
             this.signOverlapFlag = false;
+            this.currentSign = null;
             this.signText.destroy();
         }
 
@@ -503,8 +508,16 @@ class Level1 extends Phaser.Scene {
                     //console.log(enemy.direction);
                     if ((Math.abs(my.sprite.player.x - enemy.x) > 220) || (Math.abs(my.sprite.player.y - enemy.y) > 150)) {
                         enemy.awake = false; // player too far go sleep
-                        enemy.anims.stop(); // how to stop specific animation?
-                        enemy.anims.play('enemySleep');
+                        enemy.anims.stop();
+                        if (enemy.variant == 1) {
+                            enemy.anims.play('enemySleep1');
+                        }
+                        else if (enemy.variant == 2) {
+                            enemy.anims.play('enemySleep2');
+                        }
+                        else if (enemy.variant == 3) {
+                            enemy.anims.play('enemySleep3');
+                        }
                         enemy.setVelocityX(0);
                     }
                     else {
@@ -516,7 +529,15 @@ class Level1 extends Phaser.Scene {
                 }
                 else if ((Math.abs(my.sprite.player.x - enemy.x) < 220) && (Math.abs(my.sprite.player.y - enemy.y) < 150)) {
                     enemy.awake = true; // not awake and player nearby so wake up
-                    enemy.anims.play('enemyWalk');
+                    if (enemy.variant == 1) {
+                        enemy.anims.play('enemyWalk1');
+                    }
+                    else if (enemy.variant == 2) {
+                        enemy.anims.play('enemyWalk2');
+                    }
+                    else if (enemy.variant == 3) {
+                        enemy.anims.play('enemyWalk3');
+                    }
                     this.enemySetVelocity(enemy);
                 }
             }
@@ -527,6 +548,7 @@ class Level1 extends Phaser.Scene {
     changeToGreen() {
         this.greenFlag = true;
         this.blueFlag = this.orangeFlag = this.pinkFlag = false;
+        this.currentColor = 1;
         this.setColors(this.colorGreen.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.groundHiding && layer != this.groundDeadly) {
@@ -557,6 +579,7 @@ class Level1 extends Phaser.Scene {
     changeToBlue() {
         this.blueFlag = true;
         this.greenFlag = this.orangeFlag = this.pinkFlag = false;
+        this.currentColor = 2;
         this.setColors(this.colorBlue.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.blue && layer != this.blueDeadly) {
@@ -586,6 +609,7 @@ class Level1 extends Phaser.Scene {
     changeToOrange() {
         this.orangeFlag = true;
         this.blueFlag = this.greenFlag = this.pinkFlag = false;
+        this.currentColor = 3;
         this.setColors(this.colorOrange.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.orange && layer != this.orangeDeadly) {
@@ -615,6 +639,7 @@ class Level1 extends Phaser.Scene {
     changeToPink() {
         this.pinkFlag = true;
         this.blueFlag = this.orangeFlag = this.greenFlag = false;
+        this.currentColor = 4;
         this.setColors(this.colorPink.color);
         this.colorLayers.forEach(layer => {
             if (layer != this.pink && layer != this.pinkDeadly) {
@@ -748,5 +773,66 @@ class Level1 extends Phaser.Scene {
         if (inDeadZone == true) {
             this.hitObstacle(my.sprite.player);
         }
+    }
+
+    spikePitRectangles(currentColor) {
+        let hitSpike = false;
+        this.spikeZones.objects.forEach(rectangle => {
+            const bounds = new Phaser.Geom.Rectangle(rectangle.x + 1, rectangle.y + 1, rectangle.width - 2, rectangle.height - 2);
+            if (Phaser.Geom.Intersects.RectangleToRectangle(my.sprite.player.getBounds(), bounds)) {
+                switch(currentColor) {
+                    case 1: // green
+                        if (rectangle.name == "blueSpikes" || rectangle.name == "orangeSpikes" || rectangle.name == "pinkSpikes") {
+                            hitSpike = true;
+                        }
+                        break;
+                    case 2: // blue
+                        if (rectangle.name == "greenSpikes" || rectangle.name == "orangeSpikes" || rectangle.name == "pinkSpikes") {
+                            hitSpike = true;
+                        }
+                        break;
+                    case 3: // orange
+                        if (rectangle.name == "blueSpikes" || rectangle.name == "greenSpikes" || rectangle.name == "pinkSpikes") {
+                            hitSpike = true;
+                        }
+                        break;
+                    case 4: // pink
+                        if (rectangle.name == "blueSpikes" || rectangle.name == "orangeSpikes" || rectangle.name == "greenSpikes") {
+                            hitSpike = true;
+                        }
+                        break;
+                }
+            }
+        });
+
+        if (hitSpike == true) {
+            this.hitObstacle(my.sprite.player);
+        }
+    }
+
+    createEnemies() {
+        // direction left is true, right is false
+        let enemy1 = this.groundEnemies.create(352, 184, "tilemap_sprites", 344);
+        enemy1.direction = true; enemy1.awake = false; enemy1.variant = 2;
+        let enemy2 = this.groundEnemies.create(592, 88, "tilemap_sprites", 364);
+        enemy2.direction = true; enemy2.awake = false; enemy2.variant = 3;
+        let enemy3 = this.groundEnemies.create(320, 712, "tilemap_sprites", 324);
+        enemy3.direction = true; enemy3.awake = false; enemy3.variant = 1;
+        let enemy4 = this.groundEnemies.create(336, 936, "tilemap_sprites", 324);
+        enemy4.direction = false; enemy4.awake = false; enemy4.variant = 1;
+        let enemy5 = this.groundEnemies.create(176, 472, "tilemap_sprites", 344);
+        enemy5.direction = true; enemy5.awake = false; enemy5.variant = 2;
+        let enemy6 = this.groundEnemies.create(1088, 136, "tilemap_sprites", 364);
+        enemy6.direction = true; enemy6.awake = false; enemy6.variant = 3;
+        let enemy7 = this.groundEnemies.create(976, 360, "tilemap_sprites", 364);
+        enemy7.direction = false; enemy7.awake = false; enemy7.variant = 3;
+        let enemy8 = this.groundEnemies.create(2096, 632, "tilemap_sprites", 344);
+        enemy8.direction = false; enemy8.awake = false; enemy8.variant = 2;
+        let enemy9 = this.groundEnemies.create(848, 920, "tilemap_sprites", 324);
+        enemy9.direction = true; enemy9.awake = false; enemy9.variant = 1;
+        let enemy10 = this.groundEnemies.create(2016, 536, "tilemap_sprites", 324);
+        enemy10.direction = true; enemy10.awake = false; enemy10.variant = 1;
+        let enemy11 = this.groundEnemies.create(1440, 392, "tilemap_sprites", 364);
+        enemy11.direction = false; enemy11.awake = false; enemy11.variant = 3;
     }
 }
