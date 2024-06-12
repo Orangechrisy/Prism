@@ -214,7 +214,7 @@ class Level1 extends Phaser.Scene {
         }, this);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(850, 800, "tilemap_sprites", 260); // 80, 108?
+        my.sprite.player = this.physics.add.sprite(80, 108, "tilemap_sprites", 260); // 80, 108?
         my.sprite.player.setCollideWorldBounds(true);
         my.sprite.player.setMaxVelocity(this.MAX_SPEED, 1000);
         my.sprite.player.setDepth(2);
