@@ -4,11 +4,10 @@ class Credits extends Phaser.Scene {
     }
     preload() {
         this.load.setPath("./assets/");
-        this.load.bitmapFont('publicPixel', 'publicPixel_0.png', 'publicPixel.fnt');
+        this.load.image("credits", "credits.png");
     }
     create() {
-        this.creditsText = this.add.bitmapText(500, 300, "publicPixel",
-        "Congrats, you did it!\nPress R to restart!", 24, 1).setOrigin(0.5);
+        this.add.image(500, 300, "credits");
 
         this.restart = this.input.keyboard.addKey("R");
     }

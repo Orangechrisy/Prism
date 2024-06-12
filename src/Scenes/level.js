@@ -47,27 +47,26 @@ class Level1 extends Phaser.Scene {
         // Create layers
         this.background = this.map.createLayer("background", this.tilemap_main, 0, 0);
         this.ground = this.map.createLayer("ground", this.tilemap_main, 0, 0);
-        this.groundDeadly = this.map.createLayer("ground-deadly", this.tilemap_main, 0, 0);
+        //this.groundDeadly = this.map.createLayer("ground-deadly", this.tilemap_main, 0, 0);
         this.groundHiding = this.map.createLayer("ground-hiding", this.tilemap_main, 0, 0);
+        this.groundDeadly = this.map.createLayer("ground-deadly-pit", this.tilemap_main, 0, 0);
         this.blue = this.map.createLayer("ground-blue", this.tilemap_main, 0, 0);
         this.blueDeadly = this.map.createLayer("ground-blue-deadly", this.tilemap_main, 0, 0);
         this.orange = this.map.createLayer("ground-orange", this.tilemap_main, 0, 0);
         this.orangeDeadly = this.map.createLayer("ground-orange-deadly", this.tilemap_main, 0, 0);
-        this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);
+        this.pink = this.map.createLayer("ground-pink", this.tilemap_main, 0, 0);   
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
         this.deadZones = this.map.getObjectLayer("dead-zones");
-        this.greenSpikes = this.map.getObjectLayer("ground-deadly-rect");
-        this.blueSpikes = this.map.getObjectLayer("ground-blue-deadly-rect");
-        this.orangeSpikes = this.map.getObjectLayer("ground-orange-deadly-rect");
-        this.pinkSpikes = this.map.getObjectLayer("ground-pink-deadly-rect");
-;        // put layers into some arrays for later
+        this.spikeZones = this.map.getObjectLayer("pit-spikes");
+       // put layers into some arrays for later
         this.groundLayers = [this.ground, this.groundHiding, this.blue, this.orange, this.pink];
-        this.deadlyLayers = [this.groundDeadly, this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
-        this.collidingLayers = this.groundLayers.concat(this.deadlyLayers);
-        this.colorLayers = [this.groundDeadly, this.groundHiding, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
+        //this.deadlyLayers = this.groundLayers; // [this.groundDeadly] // , this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
+        this.collidingLayers = [this.ground, this.groundDeadly, this.groundHiding, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
+        this.colorLayers = [/*this.groundDeadly,*/ this.groundHiding, this.groundDeadly, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
         // set their colors
         this.colorGreen = Phaser.Display.Color.RGBStringToColor('rgba(221, 226, 201, 1)'); // why tf is this so stupid
         this.ground.setTint(this.colorGreen.color);
+        //this.groundDeadly.setTint(this.colorGreen.color);
         this.groundDeadly.setTint(this.colorGreen.color);
         this.colorBlue = Phaser.Display.Color.RGBStringToColor('rgba(66, 69, 153, 0.7)'); // might need to make these darker?
         this.blue.setTint(this.colorBlue.color);
@@ -215,7 +214,7 @@ class Level1 extends Phaser.Scene {
         }, this);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(80, 108, "tilemap_sprites", 260); // 80, 108?
+        my.sprite.player = this.physics.add.sprite(850, 800, "tilemap_sprites", 260); // 80, 108?
         my.sprite.player.setCollideWorldBounds(true);
         my.sprite.player.setMaxVelocity(this.MAX_SPEED, 1000);
         my.sprite.player.setDepth(2);
@@ -245,20 +244,6 @@ class Level1 extends Phaser.Scene {
             }
         });
         this.physics.add.collider(my.sprite.player, this.groundLayers);
-
-        this.deadlyLayers.forEach(layer => {
-            layer.forEachTile(tile => {
-                if (tile.properties["deadly"]) {
-                    tile.setCollision(false, false, false, false);
-                }
-            });
-        });
-        this.groundDeadly.forEachTile(tile => {
-            if (tile.properties["deadly"]) {
-                tile.setCollision(true, true, true, true);
-            }
-        });
-        this.physics.add.collider(my.sprite.player, this.deadlyLayers, this.hitObstacle, null, this);
 
         // camera stuff
         this.cam = this.cameras.main;
@@ -420,7 +405,7 @@ class Level1 extends Phaser.Scene {
             key: "tilemap_sprites",
             frame: 77
         });
-        console.log(this.signGroup);
+        //console.log(this.signGroup);
         this.physics.world.enable(this.signGroup, Phaser.Physics.Arcade.STATIC_BODY);
         this.currentSign = null;
         this.physics.add.overlap(my.sprite.player, this.signGroup, (player, sign) => {
@@ -432,7 +417,7 @@ class Level1 extends Phaser.Scene {
         });
         this.input.keyboard.on('keydown-E', () => { // fix stuff up here
             if (this.currentSign) {
-                console.log("sign name:", this.currentSign.name);
+                //console.log("sign name:", this.currentSign.name);
                 this.scene.launch("sign", this.currentSign.name);
                 this.scene.pause("level");
             }
@@ -542,6 +527,8 @@ class Level1 extends Phaser.Scene {
                 }
             }
         }
+
+        this.spikePitRectangles();
     }
 
     // change the color to green
@@ -551,9 +538,9 @@ class Level1 extends Phaser.Scene {
         this.currentColor = 1;
         this.setColors(this.colorGreen.color);
         this.colorLayers.forEach(layer => {
-            if (layer != this.groundHiding && layer != this.groundDeadly) {
+            if (layer != this.groundHiding && /*layer != this.groundDeadly &&*/ layer != this.groundDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/ || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
@@ -561,7 +548,7 @@ class Level1 extends Phaser.Scene {
             }
             else {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/) {
                         tile.setCollision(true, true, true, true);
                     }
                     if (tile.properties["platform"]) {
@@ -584,15 +571,16 @@ class Level1 extends Phaser.Scene {
         this.colorLayers.forEach(layer => {
             if (layer != this.blue && layer != this.blueDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/ || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
+                //console.log(layer);
                 layer.setAlpha(0);
             }
             else {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/) {
                         tile.setCollision(true, true, true, true);
                     }
                     if (tile.properties["platform"]) {
@@ -614,7 +602,7 @@ class Level1 extends Phaser.Scene {
         this.colorLayers.forEach(layer => {
             if (layer != this.orange && layer != this.orangeDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/ || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
@@ -622,7 +610,7 @@ class Level1 extends Phaser.Scene {
             }
             else {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/) {
                         tile.setCollision(true, true, true, true);
                     }
                     if (tile.properties["platform"]) {
@@ -644,7 +632,7 @@ class Level1 extends Phaser.Scene {
         this.colorLayers.forEach(layer => {
             if (layer != this.pink && layer != this.pinkDeadly) {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"] || tile.properties["platform"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/ || tile.properties["platform"]) {
                         tile.setCollision(false, false, false, false);
                     }
                 });
@@ -652,7 +640,7 @@ class Level1 extends Phaser.Scene {
             }
             else {
                 layer.forEachTile(tile => {
-                    if (tile.properties["ground"] || tile.properties["deadly"]) {
+                    if (tile.properties["ground"] /*|| tile.properties["deadly"]*/) {
                         tile.setCollision(true, true, true, true);
                     }
                     if (tile.properties["platform"]) {
@@ -670,7 +658,7 @@ class Level1 extends Phaser.Scene {
         my.sprite.player.setTint(color);
         this.groundEnemies.setTint(color);
         this.ground.setTint(color);
-        this.groundDeadly.setTint(color);
+        //this.groundDeadly.setTint(color);
         this.endItem[0].setTint(color);
         this.background.setTint(color);
         this.groundHiding.setTint(color);
@@ -680,8 +668,9 @@ class Level1 extends Phaser.Scene {
     enemyTurnAround(enemy) {
         let wallAhead = false;
         let groundAhead = false;
+        //console.log(this.collidingLayers);
         this.collidingLayers.forEach(layer => {
-            if (layer.alpha != 0) { // possibly check tile properties somewhere?
+            if (layer.alpha != 0) { 
                 if (enemy.direction) { // going left
                     if (layer.getTileAtWorldXY((enemy.x - enemy.displayWidth/2 - 1), enemy.y)) {
                         wallAhead = true;
@@ -775,29 +764,35 @@ class Level1 extends Phaser.Scene {
         }
     }
 
-    spikePitRectangles(currentColor) {
+    spikePitRectangles() {
         let hitSpike = false;
         this.spikeZones.objects.forEach(rectangle => {
             const bounds = new Phaser.Geom.Rectangle(rectangle.x + 1, rectangle.y + 1, rectangle.width - 2, rectangle.height - 2);
-            if (Phaser.Geom.Intersects.RectangleToRectangle(my.sprite.player.getBounds(), bounds)) {
-                switch(currentColor) {
+            if (my.sprite.player.visible && Phaser.Geom.Intersects.RectangleToRectangle(my.sprite.player.getBounds(), bounds)) {
+                switch(this.currentColor) {
                     case 1: // green
-                        if (rectangle.name == "blueSpikes" || rectangle.name == "orangeSpikes" || rectangle.name == "pinkSpikes") {
+                        //console.log("green spikes");
+                        if (rectangle.name == "greenSpikes" || rectangle.name == "alwaysSpikes") {
                             hitSpike = true;
                         }
                         break;
                     case 2: // blue
-                        if (rectangle.name == "greenSpikes" || rectangle.name == "orangeSpikes" || rectangle.name == "pinkSpikes") {
+                        //console.log("blue spikes");
+                        //console.log(this.blueDeadly.visible);
+                        if (rectangle.name == "blueSpikes" || rectangle.name == "alwaysSpikes") {
+                            //console.log("hitspite true");
                             hitSpike = true;
                         }
                         break;
                     case 3: // orange
-                        if (rectangle.name == "blueSpikes" || rectangle.name == "greenSpikes" || rectangle.name == "pinkSpikes") {
+                        //console.log("orange spikes");
+                        if (rectangle.name == "orangeSpikes" || rectangle.name == "alwaysSpikes") {
                             hitSpike = true;
                         }
                         break;
                     case 4: // pink
-                        if (rectangle.name == "blueSpikes" || rectangle.name == "orangeSpikes" || rectangle.name == "greenSpikes") {
+                        //console.log("pink spikes");
+                        if (rectangle.name == "pinkSpikes" || rectangle.name == "alwaysSpikes") {
                             hitSpike = true;
                         }
                         break;

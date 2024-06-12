@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="140" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="45">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="140" height="60" tilewidth="16" tileheight="16" infinite="0" nextlayerid="20" nextobjectid="103">
  <editorsettings>
   <export target="coloredLevel.tmj" format="json"/>
  </editorsettings>
@@ -1164,7 +1164,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,115,112,112,112,112,112,175,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,280,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,277,198,192,192,192,192,192,192,192,192,192,192,192,192,192,192,192,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="7" name="ground-deadly" width="140" height="60">
+ <layer id="19" name="ground-deadly-pit" width="140" height="60">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,167,167,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -1676,6 +1676,56 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="18" name="pit-spikes">
+  <object id="53" name="greenSpikes" x="800" y="135" width="96" height="10"/>
+  <object id="55" name="greenSpikes" x="800" y="327" width="96" height="10"/>
+  <object id="56" name="greenSpikes" x="800" y="423" width="96" height="10"/>
+  <object id="58" name="greenSpikes" x="800" y="615" width="96" height="10"/>
+  <object id="59" name="greenSpikes" x="800" y="711" width="96" height="10"/>
+  <object id="46" name="blueSpikes" x="800" y="231" width="96" height="10"/>
+  <object id="48" name="blueSpikes" x="800" y="327" width="96" height="10"/>
+  <object id="49" name="blueSpikes" x="800" y="423" width="96" height="10"/>
+  <object id="50" name="blueSpikes" x="800" y="519" width="96" height="10"/>
+  <object id="51" name="blueSpikes" x="800" y="615" width="96" height="10"/>
+  <object id="52" name="blueSpikes" x="800" y="711" width="96" height="10"/>
+  <object id="60" name="orangeSpikes" x="800" y="135" width="96" height="10"/>
+  <object id="61" name="orangeSpikes" x="800" y="231" width="96" height="10"/>
+  <object id="62" name="orangeSpikes" x="800" y="423" width="96" height="10"/>
+  <object id="63" name="orangeSpikes" x="800" y="519" width="96" height="10"/>
+  <object id="64" name="orangeSpikes" x="800" y="711" width="96" height="10"/>
+  <object id="65" name="pinkSpikes" x="800" y="135" width="96" height="10"/>
+  <object id="66" name="pinkSpikes" x="800" y="231" width="96" height="10"/>
+  <object id="67" name="pinkSpikes" x="800" y="327" width="96" height="10"/>
+  <object id="69" name="pinkSpikes" x="800" y="519" width="96" height="10"/>
+  <object id="70" name="pinkSpikes" x="800" y="615" width="96" height="10"/>
+  <object id="72" name="blueSpikes" x="64" y="743" width="64" height="10"/>
+  <object id="73" name="alwaysSpikes" x="256" y="919" width="32" height="9"/>
+  <object id="74" name="alwaysSpikes" x="496" y="521" width="16" height="7"/>
+  <object id="75" name="alwaysSpikes" x="416" y="89" width="64" height="7"/>
+  <object id="76" name="alwaysSpikes" x="1248" y="487" width="80" height="9"/>
+  <object id="77" name="alwaysSpikes" x="1344" y="487" width="32" height="9"/>
+  <object id="78" name="alwaysSpikes" x="1376" y="503" width="64" height="10"/>
+  <object id="79" name="alwaysSpikes" x="1456" y="519" width="32" height="9"/>
+  <object id="80" name="alwaysSpikes" x="1504" y="519" width="48" height="9"/>
+  <object id="81" name="alwaysSpikes" x="1648" y="535" width="48" height="9"/>
+  <object id="82" name="alwaysSpikes" x="1728" y="552" width="32" height="8"/>
+  <object id="83" name="alwaysSpikes" x="1776" y="807" width="160" height="10"/>
+  <object id="84" name="alwaysSpikes" x="1024" y="912" width="592" height="11"/>
+  <object id="86" name="alwaysSpikes" x="1472" y="640" width="96" height="11"/>
+  <object id="87" name="alwaysSpikes" x="1264" y="608" width="80" height="13"/>
+  <object id="88" name="alwaysSpikes" x="1232" y="752" width="128" height="12"/>
+  <object id="90" name="alwaysSpikes" x="1072" y="672" width="64" height="10"/>
+  <object id="91" name="alwaysSpikes" x="928" y="704" width="112" height="11"/>
+  <object id="93" name="alwaysSpikes" x="337" y="864" width="30" height="11"/>
+  <object id="94" name="alwaysSpikes" x="129" y="640" width="30" height="11"/>
+  <object id="95" name="alwaysSpikes" x="81" y="176" width="30" height="11"/>
+  <object id="97" name="alwaysSpikes" x="321" y="576" width="30" height="11"/>
+  <object id="98" name="alwaysSpikes" x="529" y="320" width="30" height="11"/>
+  <object id="99" name="alwaysSpikes" x="320" y="183" width="16" height="9"/>
+  <object id="100" name="alwaysSpikes" x="1057" y="16" width="30" height="11"/>
+  <object id="101" name="alwaysSpikes" x="2001" y="80" width="30" height="11"/>
+  <object id="102" name="alwaysSpikes" x="2113" y="464" width="30" height="11"/>
+ </objectgroup>
  <objectgroup id="5" name="items">
   <object id="1" name="unlockBlue" gid="23" x="2160" y="912" width="16" height="16"/>
   <object id="2" name="unlockOrange" gid="23" x="80" y="880" width="16" height="16"/>
