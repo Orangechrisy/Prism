@@ -2,7 +2,9 @@ class Load extends Phaser.Scene {
     constructor() {
         super("loadScene");
     }
-
+    init(timer) {
+        this.loadTimer = timer.time;
+    }
     preload() {
         
         this.load.setPath("./assets/");
@@ -109,7 +111,7 @@ class Load extends Phaser.Scene {
         }
 
          // ...and pass to the next Scene
-        this.scene.start("level");
+        this.scene.start("level", {time: this.loadTimer});
     }
 
     // Never get here since a new scene is started in create()

@@ -4,7 +4,6 @@ class Sign extends Phaser.Scene {
     }
     init (sign)
     {
-        console.log("init");
         this.signNumber = Number(sign);
     }
     preload() {
@@ -13,7 +12,6 @@ class Sign extends Phaser.Scene {
     }
     create() {
         this.add.image(500, 300, "signShade");
-        console.log(this.signNumber);
         switch(this.signNumber) {
             case 1:
                 this.signText = this.add.bitmapText(500, 250, "publicPixel",
@@ -60,7 +58,7 @@ class Sign extends Phaser.Scene {
                 "Congrats on making it here!\n\n\nGiant Hole Inc. is not responsible for\nany injuries sustained due to falling", 24, 1).setOrigin(0.5);
                 break;
             case 12:
-                this.signText2 = this.add.bitmapText(500, 250, "publicPixel",
+                this.signText = this.add.bitmapText(500, 250, "publicPixel",
                 "I hear the way out of this\nplace is in a big pit!\n\nBut this is a very small pit...", 24, 1).setOrigin(0.5);
                 break;
             case 13:

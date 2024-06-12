@@ -1,32 +1,22 @@
-class Credits extends Phaser.Scene {
+class Timer extends Phaser.Scene {
     constructor() {
-        super("endCredits");
+        super("timer");
     }
-    init (endingStats)
+    init (timer)
     {
-        this.deathCount = endingStats.deaths;
-        this.endTime = endingStats.time;
+        this.timer = timer.time;
     }
     preload() {
         this.load.setPath("./assets/");
-        this.load.image("credits", "credits.png");
         this.load.bitmapFont('publicPixel', 'publicPixel_0.png', 'publicPixel.fnt');
     }
     create() {
-        this.add.image(500, 300, "credits");
-
-        this.deathText = this.add.bitmapText(485, 150, "publicPixel",
-        `Deaths: ${this.deathCount}`, 30).setOrigin(0.5);
-
-        this.timerString = this.formatTime(this.endTime);
-        this.timeText = this.add.bitmapText(20, 10, "publicPixel", `${this.timerString}`, 16).setOrigin(0);
-
-        this.restart = this.input.keyboard.addKey("R");
+        this.timerString = "0"
+        this.timerText = this.add.bitmapText(20, 10, "publicPixel", `${this.timerString}`, 16).setOrigin(0);
     }
-    update() {
-        if (Phaser.Input.Keyboard.JustDown(this.restart)) {
-            this.scene.start("title");
-        }
+    update(time) {
+        this.timerString = this.formatTime(time - this.timer);
+        this.timerText.setText(`${this.timerString}`)
     }
 
     // thank you friendo jyh <3

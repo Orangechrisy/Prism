@@ -16,9 +16,9 @@ class Title extends Phaser.Scene {
 
         this.start = this.input.keyboard.addKey("S");
     }
-    update() {
+    update(time) {
         if (Phaser.Input.Keyboard.JustDown(this.start)) {
-            this.scene.start("loadScene");
+            this.scene.start("loadScene", {time: time});
         }
     }
 }

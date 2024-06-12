@@ -3,7 +3,7 @@ class Level1 extends Phaser.Scene {
         super("level");
     }
 
-    init() {
+    init(timer) {
         // variables and settings
         this.ACCELERATION = 1000;
         this.DRAG = 2000;    // DRAG < ACCELERATION = icy slide
@@ -22,11 +22,21 @@ class Level1 extends Phaser.Scene {
         this.pinkUnlock = false;
         this.currentColor = 1; // 1-4: green, blue, orange, pink
 
+        this.colorGreen = Phaser.Display.Color.RGBStringToColor('rgba(220, 228, 204, 1)');
+        this.colorBlue = Phaser.Display.Color.RGBStringToColor('rgba(66, 69, 153, 0.7)');
+        this.colorOrange = Phaser.Display.Color.RGBStringToColor('rgba(242, 137, 103, 0.8)');
+        this.colorPink = Phaser.Display.Color.RGBStringToColor('rgba(137, 21, 98, 0.7)');
+
         this.pauseScene = false;
 
         this.lastAlive = [80, 100];
+        this.isDeadFlag = false;
+        this.deathCounter = 0;
 
         this.signOverlapFlag = false;
+
+        this.levelTimer = timer.time;
+        this.levelTimer2 = timer.time;
     }
 
     preload() {
@@ -58,23 +68,17 @@ class Level1 extends Phaser.Scene {
         this.pinkDeadly = this.map.createLayer("ground-pink-deadly", this.tilemap_main, 0, 0);
         this.deadZones = this.map.getObjectLayer("dead-zones");
         this.spikeZones = this.map.getObjectLayer("pit-spikes");
-       // put layers into some arrays for later
+        // put layers into some arrays for later
         this.groundLayers = [this.ground, this.groundHiding, this.blue, this.orange, this.pink];
-        //this.deadlyLayers = this.groundLayers; // [this.groundDeadly] // , this.blueDeadly, this.orangeDeadly, this.pinkDeadly];
         this.collidingLayers = [this.ground, this.groundDeadly, this.groundHiding, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
-        this.colorLayers = [/*this.groundDeadly,*/ this.groundHiding, this.groundDeadly, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
+        this.colorLayers = [this.groundHiding, this.groundDeadly, this.blue, this.blueDeadly, this.orange, this.orangeDeadly, this.pink, this.pinkDeadly];
         // set their colors
-        this.colorGreen = Phaser.Display.Color.RGBStringToColor('rgba(221, 226, 201, 1)'); // why tf is this so stupid
         this.ground.setTint(this.colorGreen.color);
-        //this.groundDeadly.setTint(this.colorGreen.color);
         this.groundDeadly.setTint(this.colorGreen.color);
-        this.colorBlue = Phaser.Display.Color.RGBStringToColor('rgba(66, 69, 153, 0.7)'); // might need to make these darker?
         this.blue.setTint(this.colorBlue.color);
         this.blueDeadly.setTint(this.colorBlue.color);
-        this.colorOrange = Phaser.Display.Color.RGBStringToColor('rgba(242, 137, 103, 0.8)'); 
         this.orange.setTint(this.colorOrange.color);
         this.orangeDeadly.setTint(this.colorOrange.color);
-        this.colorPink = Phaser.Display.Color.RGBStringToColor('rgba(137, 21, 98, 0.7)');
         this.pink.setTint(this.colorPink.color);
         this.pinkDeadly.setTint(this.colorPink.color);
         // turn off others to start
@@ -84,7 +88,7 @@ class Level1 extends Phaser.Scene {
         this.blueDeadly.setAlpha(0);
         this.orangeDeadly.setAlpha(0);
         this.pinkDeadly.setAlpha(0);
-
+        // make the animated tiles on the map animated
         this.animatedTiles.init(this.map);
 
 
@@ -214,7 +218,7 @@ class Level1 extends Phaser.Scene {
         }, this);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(80, 108, "tilemap_sprites", 260); // 80, 108?
+        my.sprite.player = this.physics.add.sprite(840, 810, "tilemap_sprites", 260); // 80, 108 // 840 810
         my.sprite.player.setCollideWorldBounds(true);
         my.sprite.player.setMaxVelocity(this.MAX_SPEED, 1000);
         my.sprite.player.setDepth(2);
@@ -357,7 +361,9 @@ class Level1 extends Phaser.Scene {
         });
         this.physics.world.enable(this.endItem, Phaser.Physics.Arcade.STATIC_BODY);
         this.physics.add.overlap(my.sprite.player, this.endItem, (obj1, obj2) => {
-            this.scene.start("endCredits");
+            // cause it needs to be passed in as an object for some reason
+            this.scene.stop("timer");
+            this.scene.start("endCredits", {deaths: this.deathCounter, time: this.levelTimer2});
         });
 
         // enemy collider
@@ -387,6 +393,7 @@ class Level1 extends Phaser.Scene {
             checkpoint.setTint(this.colorYellow.color);
         });
 
+        // particles emitted on death
         this.emitterDeath = this.add.particles(0, 0, 'pixel', {
             tint: [this.colorGreen.color, this.colorBlue.color, this.colorOrange.color, this.colorPink.color],
             scale: { start: 3, end: 2},
@@ -400,12 +407,10 @@ class Level1 extends Phaser.Scene {
         this.pauseMenu = this.input.keyboard.addKey("P");
 
         // sign interaction
-        //this.signView = this.input.keyboard.addKey("E");
         this.signGroup = this.map.createFromObjects("signs", {
             key: "tilemap_sprites",
             frame: 77
         });
-        //console.log(this.signGroup);
         this.physics.world.enable(this.signGroup, Phaser.Physics.Arcade.STATIC_BODY);
         this.currentSign = null;
         this.physics.add.overlap(my.sprite.player, this.signGroup, (player, sign) => {
@@ -415,9 +420,8 @@ class Level1 extends Phaser.Scene {
             }
             this.currentSign = sign;
         });
-        this.input.keyboard.on('keydown-E', () => { // fix stuff up here
+        this.input.keyboard.on('keydown-E', () => {
             if (this.currentSign) {
-                //console.log("sign name:", this.currentSign.name);
                 this.scene.launch("sign", this.currentSign.name);
                 this.scene.pause("level");
             }
@@ -425,42 +429,44 @@ class Level1 extends Phaser.Scene {
         this.signGroup.forEach(sign => {
             sign.setTint(this.colorYellow.color);
         });
-        
+
+        this.scene.launch("timer", {time: this.levelTimer});
 
         // set all the things to base color as needed
         this.setColors(this.colorGreen.color);
     }
 
-    update() {
+    update(time) {
         if (Phaser.Input.Keyboard.JustDown(this.pauseMenu)) {
             this.scene.launch("pause");
             this.scene.pause();
         }
 
-        let anyOverlap = false;
-        this.signGroup.forEach (sign => {
-            if (this.physics.overlap(my.sprite.player, sign)) {
-                anyOverlap = true;
-            }
-        });
-        if (this.signText && !anyOverlap) {
-            this.signOverlapFlag = false;
-            this.currentSign = null;
-            this.signText.destroy();
-        }
+        this.levelTimer2 = time - this.levelTimer;
 
         if (!this.pauseScene) {
             this.colorCooldown -= 1;
-            //console.log(this.game.loop.actualFps);
+
+            let anyOverlap = false;
+            this.signGroup.forEach (sign => {
+                if (this.physics.overlap(my.sprite.player, sign)) {
+                    anyOverlap = true;
+                }
+            });
+            if (this.signText && !anyOverlap) {
+                this.signOverlapFlag = false;
+                this.currentSign = null;
+                this.signText.destroy();
+            }
 
             // movement
-            if(cursors.left.isDown) {
+            if(cursors.left.isDown && !this.isDeadFlag) {
                 my.sprite.player.body.setAccelerationX(-this.ACCELERATION);
                 
                 my.sprite.player.setFlip(true, false);
                 my.sprite.player.anims.play('walk', true);
 
-            } else if(cursors.right.isDown) {
+            } else if(cursors.right.isDown && !this.isDeadFlag) {
                 my.sprite.player.body.setAccelerationX(this.ACCELERATION);
 
                 my.sprite.player.resetFlip();
@@ -480,7 +486,7 @@ class Level1 extends Phaser.Scene {
                     my.sprite.player.anims.play('jump');
                 }
             }
-            if(my.sprite.player.body.blocked.down && Phaser.Input.Keyboard.JustDown(cursors.up)) {
+            if(my.sprite.player.body.blocked.down && Phaser.Input.Keyboard.JustDown(cursors.up) && !this.isDeadFlag) {
                 my.sprite.player.body.setVelocityY(this.JUMP_VELOCITY);
             }
             if (cursors.down.isDown && my.sprite.player.body.blocked.down && !cursors.left.isDown && !cursors.right.isDown) {
@@ -526,10 +532,13 @@ class Level1 extends Phaser.Scene {
                     this.enemySetVelocity(enemy);
                 }
             }
-        }
 
-        this.spikePitRectangles();
+            // run the update to check if hitting a spike
+            this.spikePitRectangles();
+        }
     }
+
+
 
     // change the color to green
     changeToGreen() {
@@ -694,20 +703,17 @@ class Level1 extends Phaser.Scene {
         return (wallAhead || !groundAhead);
     }
 
+    // player hit deadly tile
+    hitObstacle(player, obstacle) {
+        if (player.visible == true) {
+            this.setDead(player);
+        }
+    }
+
     // player hit enemy
     hitEnemy(player, enemy) {
         if (player.visible == true) {
-            player.setVelocity(0, 0);
-            player.setAcceleration(0, 0);
-            player.setVisible(0);
-            this.physics.world.gravity.y = 0;
-            this.cam.stopFollow();
-            this.emitterDeath.emitParticleAt(player.x, player.y, 50);
-            this.time.addEvent({
-                delay: 1000,
-                callback: this.respawn,
-                callbackScope: this
-            });
+            this.setDead(player);
             this.enemySetVelocity(enemy);
         }
     }
@@ -722,30 +728,33 @@ class Level1 extends Phaser.Scene {
         }
     }
 
-    // player hit deadly tile
-    hitObstacle(player, obstacle) {
-        if (player.visible == true) {
-            player.setVelocity(0, 0);
-            player.setAcceleration(0, 0);
-            player.setVisible(0);
-            this.physics.world.gravity.y = 0;
-            this.cam.stopFollow();
-            this.emitterDeath.emitParticleAt(player.x, player.y, 75);
-            this.time.addEvent({
-                delay: 1000,
-                callback: this.respawn,
-                callbackScope: this
-            });
-        }
+    // do the dead stuff
+    setDead(player) {
+        player.setVelocity(0, 0);
+        player.setAcceleration(0, 0);
+        player.setVisible(0);
+        this.physics.world.gravity.y = 0;
+        this.cam.stopFollow();
+        this.deathCounter += 1;
+        this.isDeadFlag = true;
+        this.emitterDeath.emitParticleAt(player.x, player.y, 75);
+        this.time.addEvent({
+            delay: 1000,
+            callback: this.respawn,
+            callbackScope: this
+        });
     }
 
+    // respawn the player once event finishes
     respawn() {
         my.sprite.player.setPosition(this.lastAlive[0], this.lastAlive[1]);
         my.sprite.player.setVisible(1);
         this.physics.world.gravity.y = 800;
         this.cam.startFollow(my.sprite.player, true, .25, .25);
+        this.isDeadFlag = false;
     }
 
+    // to check if the player is in a hidden area when the wall returns
     inDeadZoneCheck(boolZoneCheck) {
         let inDeadZone = false;
         this.deadZones.objects.forEach(rectangle => {
@@ -764,6 +773,7 @@ class Level1 extends Phaser.Scene {
         }
     }
 
+    // deadly spikes (and water) hitting
     spikePitRectangles() {
         let hitSpike = false;
         this.spikeZones.objects.forEach(rectangle => {
@@ -805,6 +815,7 @@ class Level1 extends Phaser.Scene {
         }
     }
 
+    // create all the enemies
     createEnemies() {
         // direction left is true, right is false
         let enemy1 = this.groundEnemies.create(352, 184, "tilemap_sprites", 344);
