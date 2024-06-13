@@ -2,6 +2,9 @@ class Pause extends Phaser.Scene {
     constructor() {
         super("pause");
     }
+    init(musicInput) {
+        this.backgroundMusic = musicInput.music;
+    }
     create() {
         this.add.image(500, 300, "pauseMenu");
 
@@ -14,6 +17,7 @@ class Pause extends Phaser.Scene {
             this.scene.stop();
         }
         if (Phaser.Input.Keyboard.JustDown(this.title)) {
+            this.backgroundMusic.stop();
             this.scene.stop("level");
             this.scene.stop("timer")
             this.scene.start("title");

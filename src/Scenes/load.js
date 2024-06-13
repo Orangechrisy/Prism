@@ -24,6 +24,11 @@ class Load extends Phaser.Scene {
         this.load.image("pixel", "1x1.png");
         this.load.image("pauseMenu", "pauseMenu.png");
         this.load.image("signShade", "shade.png");
+
+        this.load.audio("colorCollectSound", "getColorSound.ogg");
+        this.load.audio("jumpSound", "jumpSound.ogg");
+        this.load.audio("deathSound", "deathSound.ogg");
+        this.load.audio("backgroundMusic", "Dopplerette.ogg");
     }
 
     create() {
