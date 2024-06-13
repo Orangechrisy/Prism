@@ -27,7 +27,7 @@ class Sign extends Phaser.Scene {
                 break;
             case 4:
                 this.signText = this.add.bitmapText(500, 250, "publicPixel",
-                "*firely sounds*\nSure is lonely here...\n*firefly sounds*", 24, 1).setOrigin(0.5);
+                "*firefly sounds*\nSure is lonely here...\n*firefly sounds*", 24, 1).setOrigin(0.5);
                 break;
             case 5:
                 this.signText = this.add.bitmapText(500, 250, "publicPixel",

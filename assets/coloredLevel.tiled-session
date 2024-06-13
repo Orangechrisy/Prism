@@ -9,11 +9,11 @@
     ],
     "fileStates": {
         "coloredLevel.tmx": {
-            "scale": 1,
-            "selectedLayer": 0,
+            "scale": 4,
+            "selectedLayer": 10,
             "viewCenter": {
-                "x": 342.5,
-                "y": 140
+                "x": 2140.25,
+                "y": 874.5
             }
         },
         "coloredLevel.tmx#monochrome_tilemap_packed": {
